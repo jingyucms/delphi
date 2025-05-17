@@ -93,6 +93,8 @@ void convert(const char* inputFileName, const char* outputFileName,
     TVector3 netChargedPGen(0, 0, 0);
     while (std::getline(infile, line)) {
         if (line.find("HAPPY CHECK: EVENT") != std::string::npos) {
+            // reset
+            nParticleNoCut = 0;
 	  // Locate and extract the part after "HAPPY CHECK: EVENT   :"
 	  if(iEvent%1000 == 0)  cout<<"\r event processed : "<<iEvent<<flush;
 	  std::istringstream iss(line);
@@ -150,6 +152,12 @@ void convert(const char* inputFileName, const char* outputFileName,
             iss >> dummy >> dummy >> nParticleNoCut >> dummy >> dummy >> dummy;
             if (verbose) std::cout <<"get "<< nParticleNoCut << " reco particles" << std::endl;
             doParticle=1;
+            if (nParticleNoCut == 0) {
+                std::cout << "Filling Evt " << EventNo << " with 0 reco particles" << std::endl;
+                doParticle=0;
+                out_t->Fill();
+                continue;
+            }
         } else if (line.find("CHECK: GEN") != std::string::npos) {
             std::istringstream iss(line);
             std::string dummy;
