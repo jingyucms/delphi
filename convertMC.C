@@ -289,7 +289,7 @@ void convert(const char* inputFileName, const char* outputFileName,
 	      // if(!out_eData.passesBELLE || !out_eData.passesISR) continue;
 	      out_t->Fill();
 	      iEvent ++;
-	      if (verbose) std::cout <<"fill"<<std::endl;
+	      if (verbose) std::cout <<"fill reco"<<std::endl;
             }
 	} else if (!line.empty() && doGenParticle==1) {	    
             std::istringstream iss(line);
@@ -310,7 +310,7 @@ void convert(const char* inputFileName, const char* outputFileName,
 	        float q(0);
 	        TParticlePDG* particle = pdgDatabase->GetParticle(particleID);
 		q = particle->Charge() / 3.0;
-                if (verbose) std::cout <<"do particle: " << nGenParticle << "-th (" << particleNumber << ")" <<std::endl;
+                if (verbose) std::cout <<"do gen particle: " << nGenParticle << "-th (" << particleNumber << ")" <<std::endl;
                 netPGen -= TVector3(pxVal, pyVal, pzVal);
 
 		if (abs(q) > 0.5) {netChargedPGen -= TVector3(pxVal, pyVal, pzVal);}
@@ -410,7 +410,7 @@ void convert(const char* inputFileName, const char* outputFileName,
                 out_tgen->Fill();
                 iEvent ++;
                 // if (iEvent==10) break;
-                if (verbose) std::cout <<"fill"<<std::endl;
+                if (verbose) std::cout <<"fill gen"<<std::endl;
             }
         }
     }

@@ -54,13 +54,13 @@ FILE = {}
 #tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4144_qqar/'
 #files = glob.glob(tin)
 
-#tin = '/eos/opendata/delphi/simulated-data/lyon/kk2f4143/v98e/188.6/kk2f4143_qq_188.6_2*xsdst'
-#tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4143_qq/'
-#files = glob.glob(tin)
-
-tin = '/eos/opendata/delphi/simulated-data/ral/kk2f4144/v98e/188.6/*xsdst'
-tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4144_ttsp/'
+tin = '/eos/opendata/delphi/simulated-data/lyon/kk2f4143/v98e/188.6/kk2f4143_qq_188.6_24001.xsdst'
+tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4143_qq/'
 files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/ral/kk2f4144/v98e/188.6/*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4144_ttsp/'
+#files = glob.glob(tin)
 
 #tin = '/eos/opendata/delphi/simulated-data/cern/wphact24/v98e/188.6/wphact24_4q_188.6_80.4_2054*xsdst'
 #tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/wphact24_4q/'
@@ -76,6 +76,26 @@ files = glob.glob(tin)
 
 #tin = '/eos/opendata/delphi/simulated-data/ral/qedbk23/eegg/v98e/188.0/EK577*'
 #tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/qedbk23eegg/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/lyon/kk2f4143/v99e/195.5/*219*.xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/1999_v2/v99e1/kk2f4143_qq/196/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/cern/wphact24/v99e/199.5/wphact24_cc*.xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/1999_v2/v99e1/wphact24_cc/200/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/lyon/wphact21/v99e/201.6/wphact21_nc4f*.xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/1999_v2/v99e1/wphact21_nc/202/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/cern/kk2f4144/v99e/201.6/kk2f4144_tthl*'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/1999_v2/v99e1/kk2f4144_tthl/202/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/ral/qedbk23/eegg/v99e/202.0/*'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/1999_v2/v99e1/qedbk23eegg/202/'
 #files = glob.glob(tin)
 
 os.system(f'mkdir -p {tout}')
@@ -104,5 +124,5 @@ for al in files:
     os.system(f'mv dump.{basename}.err err/')
     os.system(f'../bin/convertMC.exe log/dump.{basename}.log out/{basename}.root')
     os.system(f'mv out/{basename}.root {tout}')
-    os.system(f'rm log/dump.{basename}.log')
-    os.system(f'rm err/dump.{basename}.err')
+    #os.system(f'rm log/dump.{basename}.log')
+    #os.system(f'rm err/dump.{basename}.err')
