@@ -411,6 +411,8 @@ CCC  +        IHAD4 .NE. 0 ) NEED = 1
 +CDE, PSCSTC.
 +CDE, PSCHAC.
 +CDE, PSCLUJ.
++CDE, PSCMUD.
++CDE, PSCELD.
 
 *
       INTEGER I, IERR
@@ -423,12 +425,13 @@ CCC  +        IHAD4 .NE. 0 ) NEED = 1
       PRINT *, "--------------------------"
       WRITE(*,98)      "HAPPY CHECK: EVENT:",IIIRUN, IIIEVT
       WRITE(*,97)      "CHECK: ECM:",ECMAS
-      WRITE(*, 99)     "CHECK: TRACKS:", NVECP, LENEMF, LENHPC, LENHAC
+      WRITE(*, 99)     "CHECK: TRACKS:", NVECP, NELID, NMUID
       DO I=1, NVECP
          WRITE(*, *)  I, VECP(7,I), VECP(1,I),VECP(2,I),
      $        VECP(3,I), VECP(4,I), QEMF(8,I), QHPC(8,I),
      $        QHAC(8,I), QSTIC(1,I), LVLOCK(I), QTRAC(4,I),
-     $        QTRAC(5,I), QTRAC(24,I)
+     $        QTRAC(5,I), QTRAC(24,I), KELID(1, I), KELID(2, I),
+     $        KMUID(1, I)
       ENDDO
       WRITE(*, 104)     "CHECK: GEN:", NP
       DO I=1, NP
@@ -437,7 +440,7 @@ CCC  +        IHAD4 .NE. 0 ) NEED = 1
       ENDDO
  97   FORMAT(A,F10.2)
  98   FORMAT(A,I10,I10)
- 99   FORMAT(A,I10,I10,I10,I10)
+ 99   FORMAT(A,I10,I10,I10)
  104  FORMAT(A,I10)
 * 105  FORMAT(A,I10,F12.6, F12.6, F12.6, F12.6, F12.6, F12.6,I10)
 * 106  FORMAT(A,"(",F12.6,",",F12.6,",",F12.6,",",F12.6,")")
