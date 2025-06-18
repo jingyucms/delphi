@@ -44,6 +44,10 @@ void convert(const char* inputFileName, const char* outputFileName,
     particleData    out_pData_gen;
     eventData       out_eData_gen;
 
+    TTree * out_tgenBefore= new TTree("tgenBefore", "tgenBefore");
+    particleData    out_pData_genBefore;
+    eventData       out_eData_genBefore;
+
     // Variables for event information and particle data
     float emf[particleData::nMaxPart];
     float hpc[particleData::nMaxPart];
@@ -73,17 +77,23 @@ void convert(const char* inputFileName, const char* outputFileName,
     out_pData_gen.SetBranchWrite(out_tgen, 1);
     out_eData_gen.SetBranchWrite(out_tgen, 0);
 
+    out_pData_genBefore.SetBranchWrite(out_tgenBefore, 1);
+    out_eData_genBefore.SetBranchWrite(out_tgenBefore, 0);
+
     TDatabasePDG* pdgDatabase = TDatabasePDG::Instance();
 
     // Process the log file for reco
     std::string line;
     bool doParticle=0;
     bool doGenParticle=0;
+    bool doSimParticle=0;
     int iEvent=0;
     int nParticleNoCut = 0; int nParticle = 0;
     int nGenParticleNoCut = 0; int nGenParticle = 0;
+    int nSimParticleNoCut = 0; int nSimParticle = 0;
     int nParticleHP = 0; int nChargedParticle = 0; int nChargedParticleHP = 0;
     int nGenParticleHP = 0; int nGenChargedParticle = 0; int nGenChargedParticleHP = 0;
+    int nSimParticleHP = 0; int nSimChargedParticle = 0; int nSimChargedParticleHP = 0;
     float energy = 0;
     int RunNo;
     int EventNo;
@@ -91,6 +101,9 @@ void convert(const char* inputFileName, const char* outputFileName,
     TVector3 netChargedP(0, 0, 0);
     TVector3 netPGen(0, 0, 0);
     TVector3 netChargedPGen(0, 0, 0);
+    TVector3 netPSim(0, 0, 0);
+    TVector3 netChargedPSim(0, 0, 0);
+    std::vector<int> llp;
     while (std::getline(infile, line)) {
         if (line.find("HAPPY CHECK: EVENT") != std::string::npos) {
             // reset
@@ -105,6 +118,9 @@ void convert(const char* inputFileName, const char* outputFileName,
 
 	  out_pData_gen.RunNo = out_pData.RunNo;
 	  out_pData_gen.EventNo = out_pData.EventNo;
+
+	  out_pData_genBefore.RunNo = out_pData.RunNo;
+	  out_pData_genBefore.EventNo = out_pData.EventNo;
 	  
 	  if (verbose) std::cout << "Run: " << out_pData.RunNo << ", Event: " << out_pData.EventNo << std::endl;
 	  out_pData.year = 1998; // temp //
@@ -115,16 +131,19 @@ void convert(const char* inputFileName, const char* outputFileName,
 	  out_pData.isOnres = false;
 	  out_pData_gen.isMC = true;
 	  out_pData_gen.isOnres = false;
+	  out_pData_genBefore.isMC = true;
+	  out_pData_genBefore.isOnres = false;
 	  // out_pData.uniqueID = 0;
 	  // out_pData.Energy = 0;
 	  // out_pData.bFlag = -999;
 	  out_pData.particleWeight = 1;
 	  out_pData_gen.particleWeight = 1;
+	  out_pData_genBefore.particleWeight = 1;
 	  // out_pData.bx = -999;
 	  // out_pData.by = -999;
 	  // out_pData.ebx = -999;
 	  // out_pData.eby = -999;
-	
+	  
 	  nParticle = 0;
 	  nParticleHP = 0;
 	  nChargedParticle = 0;
@@ -138,6 +157,13 @@ void convert(const char* inputFileName, const char* outputFileName,
 	  nGenChargedParticleHP = 0;
 	  netPGen = TVector3(0, 0, 0);
 	  netChargedPGen = TVector3(0, 0, 0);
+
+	  nSimParticle = 0;
+	  nSimParticleHP = 0;
+	  nSimChargedParticle = 0;
+	  nSimChargedParticleHP = 0;
+	  netPSim = TVector3(0, 0, 0);
+	  netChargedPSim = TVector3(0, 0, 0);
 	  
 	} else if (line.find("CHECK: ECM") != std::string::npos) {
 	    std::istringstream iss(line);
@@ -152,6 +178,8 @@ void convert(const char* inputFileName, const char* outputFileName,
             iss >> dummy >> dummy >> nParticleNoCut >> dummy >> dummy >> dummy;
             if (verbose) std::cout <<"get "<< nParticleNoCut << " reco particles" << std::endl;
             doParticle=1;
+	    doGenParticle=0;
+	    doSimParticle=0;
             if (nParticleNoCut == 0) {
                 std::cout << "Filling Evt " << EventNo << " with 0 reco particles" << std::endl;
                 doParticle=0;
@@ -163,12 +191,23 @@ void convert(const char* inputFileName, const char* outputFileName,
             std::string dummy;
             iss >> dummy >> dummy >> nGenParticleNoCut;
             if (verbose) std::cout <<"get "<< nGenParticleNoCut << " gen particles" << std::endl;
-            doGenParticle=1;
-        } else if (!line.empty() && doParticle==1) {
+	    doParticle=0;
+	    doGenParticle=1;
+	    doSimParticle=0;
+        } else if (line.find("CHECK: SIM") != std::string::npos) {
             std::istringstream iss(line);
-            int particleNumber;
+            std::string dummy;
+            iss >> dummy >> dummy >> nSimParticleNoCut;
+            if (verbose) std::cout <<"get "<< nSimParticleNoCut << " sim particles" << std::endl;
+            doParticle=0;
+	    doGenParticle=0;
+	    doSimParticle=1;
+	    llp.clear();
+        } else if (!line.empty() && doParticle==1 && doGenParticle==0 && doSimParticle==0) {
+            std::istringstream iss(line);
+            int particleNumber, eid, conversion, muid;
             float q, pxVal, pyVal, pzVal, eVal, emfVal, hpcVal, hacVal, sticVal, lockVal, d0, z0, length;
-            iss >> particleNumber >> q >> pxVal >> pyVal >> pzVal >> eVal >> emfVal >> hpcVal >> hacVal >> sticVal >> lockVal >> d0 >> z0 >> length;
+            iss >> particleNumber >> q >> pxVal >> pyVal >> pzVal >> eVal >> emfVal >> hpcVal >> hacVal >> sticVal >> lockVal >> d0 >> z0 >> length >> eid >> conversion >> muid;
 
             TLorentzVector temp(pxVal, pyVal, pzVal, eVal);
 
@@ -203,7 +242,10 @@ void convert(const char* inputFileName, const char* outputFileName,
 		out_pData.d0[nParticle] = d0;
  		out_pData.z0[nParticle] = z0;
  		out_pData.ntpc[nParticle] = (out_pData.charge[nParticle]!=0)? 7: 0;
-		out_pData.weight[nParticle] = length; // use this variable to store track length for DELPHI 
+		out_pData.weight[nParticle] = length; // use this variable to store track length for DELPHI
+		out_pData.eleId[nParticle] = eid;
+		out_pData.muId[nParticle] = muid;
+		out_pData.conversion[nParticle] = conversion;
 
                 // follow the same definition in eventSelection.h
 		if (out_pData.pwflag[nParticle]<=2) {
@@ -299,17 +341,17 @@ void convert(const char* inputFileName, const char* outputFileName,
 	      iEvent ++;
 	      if (verbose) std::cout <<"fill reco"<<std::endl;
             }
-	} else if (!line.empty() && doGenParticle==1) {	    
+	} else if (!line.empty() && doParticle==0 && doGenParticle==1 && doSimParticle==0) {	    
             std::istringstream iss(line);
-            int particleNumber;
-            float particleID, pxVal, pyVal, pzVal, eVal, mVal, status;
-            iss >> particleNumber >> particleID >> pxVal >> pyVal >> pzVal >> eVal >> mVal >> status;
+            int particleNumber, particleID, status;
+            float pxVal, pyVal, pzVal, eVal, mVal;
+            iss >> particleNumber >> status >> particleID >> pxVal >> pyVal >> pzVal >> eVal >> mVal;
 
             TLorentzVector temp(pxVal, pyVal, pzVal, eVal);
 
             ///// veto the beam background and other backgrounds ///// 
-            bool pass(1);
-            pass = (status == 1); // final state particle
+            bool pass;
+            pass = (status == 1 || status == 4); // final state particle
             ///// veto the beam background and other backgrounds /////
 	    
             if (pass)
@@ -413,11 +455,133 @@ void convert(const char* inputFileName, const char* outputFileName,
 		  (out_eData_gen.nChargedParticleHP>=5);
                 out_eData_gen.passesISR = eSelection.getPassesISR();
                 out_eData_gen.passesWW = eSelection.getPassesWW();
-                // if(!out_eData_gen.passesBELLE || !out_eData_gen.passesISR) continue;
 
                 out_tgen->Fill();
                 iEvent ++;
-                // if (iEvent==10) break;
+                if (verbose) std::cout <<"fill gen"<<std::endl;
+            }
+        } else if (!line.empty() && doParticle==0 && doGenParticle==0 && doSimParticle==1) {	    
+            std::istringstream iss(line);
+            int particleNumber;
+	    int particleID, status, mom, dau;
+            float pxVal, pyVal, pzVal, eVal, mVal, q;
+            iss >> particleNumber >> status >> particleID >> pxVal >> pyVal >> pzVal >> eVal >> mVal >> q >> mom >> dau;
+
+            TLorentzVector temp(pxVal, pyVal, pzVal, eVal);
+
+            bool pass;
+	    if (status ==1) {
+	      pass = 1;
+	    } else if (status == 4) {
+	      llp.push_back(dau);
+	      pass = 0;
+	    } else if (particleID == 0 && std::find(llp.begin(), llp.end(), mom) != llp.end()) {
+	      pass = 1;
+	    } else {
+	      pass = 0;
+	    }
+	    
+            if (pass)
+            {
+	        // calculate charge
+                if (verbose) std::cout <<"do sim particle: " << nSimParticle << "-th (" << particleNumber << ")" <<std::endl;
+                netPSim -= TVector3(pxVal, pyVal, pzVal);
+
+		if (abs(q) > 0.5) {netChargedPSim -= TVector3(pxVal, pyVal, pzVal);}
+
+                out_pData_genBefore.px[nSimParticle] = pxVal;
+                out_pData_genBefore.py[nSimParticle] = pyVal;
+                out_pData_genBefore.pz[nSimParticle] = pzVal;
+                out_pData_genBefore.pt[nSimParticle] = temp.Pt();
+                out_pData_genBefore.pmag[nSimParticle]   = temp.P();
+                out_pData_genBefore.rap[nSimParticle]    = temp.Rapidity();
+                out_pData_genBefore.eta[nSimParticle]    = temp.Eta();
+                out_pData_genBefore.theta[nSimParticle]  = temp.Theta();
+                out_pData_genBefore.phi[nSimParticle]    = temp.Phi();
+                out_pData_genBefore.mass[nSimParticle]   = temp.M();
+                out_pData_genBefore.charge[nSimParticle] = q;
+		out_pData_genBefore.pid[nSimParticle] = particleID;
+                out_pData_genBefore.pwflag[nSimParticle] = (out_pData_genBefore.charge[nSimParticle]!=0)? 0: 4; // charged = 0, neutral = 4
+		
+                // follow the same definition in eventSelection.h
+		if (out_pData_genBefore.pwflag[nSimParticle]<=2) {
+		  out_pData_genBefore.highPurity[nSimParticle]= 1;
+		} else if (out_pData_genBefore.pwflag[nSimParticle]==4) {
+		  out_pData_genBefore.highPurity[nSimParticle]= 1;
+		}
+
+                if(out_pData_genBefore.pwflag[nSimParticle]<=2) {
+                    nSimChargedParticle++;
+                    if (out_pData_genBefore.highPurity[nSimParticle]) nSimChargedParticleHP++;
+                }
+                if (out_pData_genBefore.highPurity[nSimParticle]) nSimParticleHP++;
+                nSimParticle++;
+            }
+
+            if (particleNumber==nSimParticleNoCut)  {
+                out_pData_genBefore.nParticle       = nSimParticle;
+                out_eData_genBefore.nChargedParticle  = nSimChargedParticle;
+                out_eData_genBefore.nParticleHP       = nSimParticleHP;
+                out_eData_genBefore.nChargedParticleHP= nSimChargedParticleHP;
+                doSimParticle=0;
+                if (verbose) std::cout <<"End reading particles, recording " << out_pData_genBefore.nParticle << " particles." <<std::endl;
+
+                out_eData_genBefore.missP = netPSim.Mag();
+                out_eData_genBefore.missPt = netPSim.Perp();
+                out_eData_genBefore.missTheta = netPSim.Theta();
+                out_eData_genBefore.missPhi = netPSim.Phi();
+
+		out_eData_genBefore.missChargedP = netChargedPSim.Mag();
+		out_eData_genBefore.missChargedPt = netChargedPSim.Perp();
+		out_eData_genBefore.missChargedTheta = netChargedPSim.Theta();
+		out_eData_genBefore.missChargedPhi = netChargedPSim.Phi();
+
+                TVector3 thrust             = getThrust(out_pData_genBefore.nParticle, out_pData_genBefore.px, out_pData_genBefore.py, out_pData_genBefore.pz, THRUST::OPTIMAL);
+                TVector3 thrustWithMissP    = getThrust(out_pData_genBefore.nParticle, out_pData_genBefore.px, out_pData_genBefore.py, out_pData_genBefore.pz, THRUST::OPTIMAL,false,false,NULL,true,out_pData_genBefore.pwflag);
+
+                out_eData_genBefore.Thrust        = thrust.Mag();
+                out_eData_genBefore.TTheta        = thrust.Theta();
+                out_eData_genBefore.TPhi          = thrust.Phi();
+                out_eData_genBefore.ThrustWithMissP   = thrustWithMissP.Mag();
+                out_eData_genBefore.TThetaWithMissP   = thrustWithMissP.Theta();
+                out_eData_genBefore.TPhiWithMissP     = thrustWithMissP.Phi();
+                if ( do_thrustMissP ) {
+                        setThrustVariables(&out_pData_genBefore, &out_eData_genBefore, TVector3(),
+                                TVector3(), TVector3(), TVector3(), TVector3(),
+                                thrustWithMissP);
+                }
+
+                Sphericity spher = Sphericity(out_pData_genBefore.nParticle,
+                                  out_pData_genBefore.px,
+                                  out_pData_genBefore.py,
+                                  out_pData_genBefore.pz,
+                                  out_pData_genBefore.pwflag,
+                                  false);
+                spher.setTree(&out_eData_genBefore);
+
+                eventSelection eSelection;
+                eSelection.setEventSelection(&out_pData_genBefore, &out_eData_genBefore);
+
+                if (verbose)
+                {
+                    printf("eSelection.getPassesNeuNch(): %o\n", eSelection.getPassesNeuNch());
+                    printf("eSelection.getPassesSTheta(): %o\n", eSelection.getPassesSTheta());
+                    printf("eSelection.getPassesTotalChgEnergyMin(): %o\n", eSelection.getPassesTotalChgEnergyMin());
+                    printf("out_eData_genBefore.nChargedParticleHP: %d\n", out_eData_genBefore.nChargedParticleHP);
+                }
+		out_eData_genBefore.passesTotalChgEnergyMin = eSelection.getPassesTotalChgEnergyMin();
+		out_eData_genBefore.passesNeuNch = eSelection.getPassesNeuNch();
+		out_eData_genBefore.passesNTrkMin = eSelection.getPassesNTrkMin();
+		out_eData_genBefore.passesSTheta = eSelection.getPassesSTheta();
+                out_eData_genBefore.passesBELLE = eSelection.getPassesNeuNch() && \
+		  eSelection.getPassesSTheta() &&			\
+		  eSelection.getPassesTotalChgEnergyMin() &&		\
+		  (out_eData_genBefore.nChargedParticleHP>=5);
+                out_eData_genBefore.passesISR = eSelection.getPassesISR();
+                out_eData_genBefore.passesWW = eSelection.getPassesWW();
+
+                out_tgenBefore->Fill();
+                iEvent ++;
                 if (verbose) std::cout <<"fill gen"<<std::endl;
             }
         }
@@ -428,6 +592,7 @@ void convert(const char* inputFileName, const char* outputFileName,
     // Write the tree to the output file
     out_t->Write();
     out_tgen->Write();
+    out_tgenBefore->Write();
     outFile.Close();
     infile.close();
 

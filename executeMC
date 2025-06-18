@@ -17,8 +17,17 @@ FILE = {}
 '''
 
 #tin = '/eos/opendata/delphi/simulated-data/cern/qqps/v94c/91.25/qqps*.sdst'
-#tin = '/eos/opendata/delphi/simulated-data/cern/qqps/v94c/91.25/qqps_91.25_21000.sdst'
 #tout = '/eos/user/z/zhangj/DELPHI/simulation/1994_v2/qqps/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/cern/kk2f4145/v94c/91.25/kk2f4145_qqpy_91.25_10*'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/1994_v2/kk2f4145_qqpy/'
+#files = glob.glob(tin)
+
+tin = '/eos/opendata/delphi/simulated-data/cern/kk2f4146/v94c/91.25/kk2f4146_qqpydcy_91.25_*.sdst'
+#tin = '/eos/opendata/delphi/simulated-data/cern/kk2f4146/v94c/91.25/kk2f4146_qqpydcy_91.25_20000.sdst'
+tout = "/eos/user/z/zhangj/DELPHI/simulation/v94c/91.25/kk2f4146_qqpydcy_test_v4"
+files = glob.glob(tin)
 
 #tin = '/eos/opendata/delphi/simulated-data/karlsruhe/wwex_postdst/v98d2/189/*5798*.xsdst'
 #tout = '/eos/user/z/zhangj/DELPHI/simulation/1998/wwex_postdst/v98d2/189/'
@@ -54,9 +63,9 @@ FILE = {}
 #tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4144_qqar/'
 #files = glob.glob(tin)
 
-tin = '/eos/opendata/delphi/simulated-data/lyon/kk2f4143/v98e/188.6/kk2f4143_qq_188.6_24001.xsdst'
-tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4143_qq/'
-files = glob.glob(tin)
+#tin = '/eos/opendata/delphi/simulated-data/lyon/kk2f4143/v98e/188.6/kk2f4143_qq_188.6_24001.xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4143_qq/'
+#files = glob.glob(tin)
 
 #tin = '/eos/opendata/delphi/simulated-data/ral/kk2f4144/v98e/188.6/*xsdst'
 #tout = '/eos/user/z/zhangj/DELPHI/simulation/1998_v2/v98e1/kk2f4144_ttsp/'
@@ -98,6 +107,39 @@ files = glob.glob(tin)
 #tout = '/eos/user/z/zhangj/DELPHI/simulation/1999_v2/v99e1/qedbk23eegg/202/'
 #files = glob.glob(tin)
 
+#tin = '/eos/opendata/delphi/simulated-data/live/wphact20_fixed/va0e/208/*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/2000_v2/v00e1/wphact20_cc/208/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/lyon/wphact20_fixed/va0e/206.5/*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/2000_v2/v00e1/wphact20_cc/207/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/cern/kk2f4143/va0e/205/*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/2000_v2/v00e1/kk2f4143_qq/205/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/lyon/kk2f4143/va0e/208/*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/2000_v2/v00e1/kk2f4143_qq/208/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/lyon/wphact21/va0e/203.7/*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/2000_v2/v00e1/wphact21_nc4f/204/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/cern/wphact21/va0e/208/*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/2000_v2/v00e1/wphact21_nc4f/208/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/cern/kk2f4144/va0e/208/*tthl*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/2000_v2/v00e1/kk2f4144_tthl/208/'
+#files = glob.glob(tin)
+
+#tin = '/eos/opendata/delphi/simulated-data/ral/kk2f4144/va0e/206.5/*tthl*150*xsdst'
+#tout = '/eos/user/z/zhangj/DELPHI/simulation/2000_v2/v00e1/kk2f4144_tthl/207/'
+#files = glob.glob(tin)
+
+
 os.system(f'mkdir -p {tout}')
 
 if len(sys.argv) > 1:
@@ -124,5 +166,5 @@ for al in files:
     os.system(f'mv dump.{basename}.err err/')
     os.system(f'../bin/convertMC.exe log/dump.{basename}.log out/{basename}.root')
     os.system(f'mv out/{basename}.root {tout}')
-    #os.system(f'rm log/dump.{basename}.log')
-    #os.system(f'rm err/dump.{basename}.err')
+    os.system(f'rm log/dump.{basename}.log')
+    os.system(f'rm err/dump.{basename}.err')

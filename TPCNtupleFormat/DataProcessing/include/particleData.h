@@ -69,6 +69,9 @@ class particleData{
   float vy[nMaxPart];
   float vz[nMaxPart];
   float weight[nMaxPart];
+  int eleId[nMaxPart];
+  int muId[nMaxPart];
+  int conversion[nMaxPart];
 
   //thrust axis variables
   float pt_wrtThrMissP[nMaxPart];
@@ -139,7 +142,7 @@ class particleData{
   float artificAcceptEffCorrection[nMaxPart];
   int anc[nMaxPart];
     
-  static const int nVar = 103;
+  static const int nVar = 106;
   std::string varStr[nVar] = {"nParticle",
 			      "EventNo",
 			      "RunNo",
@@ -180,6 +183,9 @@ class particleData{
 			      "vy",
 			      "vz",
 			      "weight",
+			      "eleId",
+			      "muId",
+			      "conversion",
 			      "pt_wrtThr",
 			      "eta_wrtThr",
 			      "rap_wrtThr",
@@ -366,6 +372,9 @@ particleData::particleData(bool in_initMinimal) : initMinimal(in_initMinimal)
     vy[i] = -999.;
     vz[i] = -999.;
     weight[i] = -999.;
+    eleId[i] = -127;
+    muId[i] = -127;
+    conversion[i] = -127;
     
     if (!initMinimal)
     {
@@ -585,71 +594,73 @@ void particleData::SetStatusAndAddressRead(TTree* inTree_p, std::vector<std::str
   if(varIsGood[37]) inTree_p->SetBranchAddress("vy", vy);
   if(varIsGood[38]) inTree_p->SetBranchAddress("vz", vz);
   if(varIsGood[39]) inTree_p->SetBranchAddress("weight", weight);
-  if(varIsGood[40]) inTree_p->SetBranchAddress("pt_wrtThr", pt_wrtThr);
-  if(varIsGood[41]) inTree_p->SetBranchAddress("eta_wrtThr", eta_wrtThr);
-  if(varIsGood[42]) inTree_p->SetBranchAddress("rap_wrtThr", rap_wrtThr);
-  if(varIsGood[43]) inTree_p->SetBranchAddress("theta_wrtThr", theta_wrtThr);
-  if(varIsGood[44]) inTree_p->SetBranchAddress("phi_wrtThr", phi_wrtThr);
-  if(varIsGood[45]) inTree_p->SetBranchAddress("pt_wrtThrPerp", pt_wrtThrPerp);
-  if(varIsGood[46]) inTree_p->SetBranchAddress("eta_wrtThrPerp", eta_wrtThrPerp);
-  if(varIsGood[47]) inTree_p->SetBranchAddress("rap_wrtThrPerp", rap_wrtThrPerp);
-  if(varIsGood[48]) inTree_p->SetBranchAddress("theta_wrtThrPerp", theta_wrtThrPerp);
-  if(varIsGood[49]) inTree_p->SetBranchAddress("phi_wrtThrPerp", phi_wrtThrPerp);
-  if(varIsGood[50]) inTree_p->SetBranchAddress("pt_wrtChThr", pt_wrtChThr);
-  if(varIsGood[51]) inTree_p->SetBranchAddress("eta_wrtChThr", eta_wrtChThr);
-  if(varIsGood[52]) inTree_p->SetBranchAddress("rap_wrtChThr", rap_wrtChThr);
-  if(varIsGood[53]) inTree_p->SetBranchAddress("theta_wrtChThr", theta_wrtChThr);
-  if(varIsGood[54]) inTree_p->SetBranchAddress("phi_wrtChThr", phi_wrtChThr);
-  if(varIsGood[55]) inTree_p->SetBranchAddress("pt_wrtChThrPerp", pt_wrtChThrPerp);
-  if(varIsGood[56]) inTree_p->SetBranchAddress("eta_wrtChThrPerp", eta_wrtChThrPerp);
-  if(varIsGood[57]) inTree_p->SetBranchAddress("phi_wrtChThrPerp", phi_wrtChThrPerp);
-  if(varIsGood[58]) inTree_p->SetBranchAddress("rap_wrtChThrPerp", rap_wrtChThrPerp);
-  if(varIsGood[59]) inTree_p->SetBranchAddress("theta_wrtChThrPerp", theta_wrtChThrPerp);
-  if(varIsGood[60]) inTree_p->SetBranchAddress("pt_wrtNeuThr", pt_wrtNeuThr);
-  if(varIsGood[61]) inTree_p->SetBranchAddress("eta_wrtNeuThr", eta_wrtNeuThr);
-  if(varIsGood[62]) inTree_p->SetBranchAddress("rap_wrtNeuThr", rap_wrtNeuThr);
-  if(varIsGood[63]) inTree_p->SetBranchAddress("theta_wrtNeuThr", theta_wrtNeuThr);
-  if(varIsGood[64]) inTree_p->SetBranchAddress("phi_wrtNeuThr", phi_wrtNeuThr);
-  if(varIsGood[65]) inTree_p->SetBranchAddress("pt_wrtNeuThrPerp", pt_wrtNeuThrPerp);
-  if(varIsGood[66]) inTree_p->SetBranchAddress("eta_wrtNeuThrPerp", eta_wrtNeuThrPerp);
-  if(varIsGood[67]) inTree_p->SetBranchAddress("theta_wrtNeuThrPerp", theta_wrtNeuThrPerp);
-  if(varIsGood[68]) inTree_p->SetBranchAddress("phi_wrtNeuThrPerp", phi_wrtNeuThrPerp);
-  if(varIsGood[69]) inTree_p->SetBranchAddress("rap_wrtNeuThrPerp", rap_wrtNeuThrPerp);
-  if(varIsGood[70]) inTree_p->SetBranchAddress("pt_wrtThrCorr", pt_wrtThrCorr);
-  if(varIsGood[71]) inTree_p->SetBranchAddress("eta_wrtThrCorr", eta_wrtThrCorr);
-  if(varIsGood[72]) inTree_p->SetBranchAddress("rap_wrtThrCorr", rap_wrtThrCorr);
-  if(varIsGood[73]) inTree_p->SetBranchAddress("theta_wrtThrCorr", theta_wrtThrCorr);
-  if(varIsGood[74]) inTree_p->SetBranchAddress("phi_wrtThrCorr", phi_wrtThrCorr);
-  if(varIsGood[75]) inTree_p->SetBranchAddress("pt_wrtThrCorrPerp", pt_wrtThrCorrPerp);
-  if(varIsGood[76]) inTree_p->SetBranchAddress("eta_wrtThrCorrPerp", eta_wrtThrCorrPerp);
-  if(varIsGood[77]) inTree_p->SetBranchAddress("rap_wrtThrCorrPerp", rap_wrtThrCorrPerp);
-  if(varIsGood[78]) inTree_p->SetBranchAddress("theta_wrtThrCorrPerp", theta_wrtThrCorrPerp);
-  if(varIsGood[79]) inTree_p->SetBranchAddress("phi_wrtThrCorrPerp", phi_wrtThrCorrPerp);
-  if(varIsGood[80]) inTree_p->SetBranchAddress("pt_wrtThrCorrInverse", pt_wrtThrCorrInverse);
-  if(varIsGood[81]) inTree_p->SetBranchAddress("eta_wrtThrCorrInverse", eta_wrtThrCorrInverse);
-  if(varIsGood[82]) inTree_p->SetBranchAddress("rap_wrtThrCorrInverse", rap_wrtThrCorrInverse);
-  if(varIsGood[83]) inTree_p->SetBranchAddress("theta_wrtThrCorrInverse", theta_wrtThrCorrInverse);
-  if(varIsGood[84]) inTree_p->SetBranchAddress("phi_wrtThrCorrInverse", phi_wrtThrCorrInverse);
-  if(varIsGood[85]) inTree_p->SetBranchAddress("pt_wrtThrCorrInversePerp", pt_wrtThrCorrInversePerp);
-  if(varIsGood[86]) inTree_p->SetBranchAddress("eta_wrtThrCorrInversePerp", eta_wrtThrCorrInversePerp);
-  if(varIsGood[87]) inTree_p->SetBranchAddress("rap_wrtThrCorrInversePerp", rap_wrtThrCorrInversePerp);
-  if(varIsGood[88]) inTree_p->SetBranchAddress("theta_wrtThrCorrInversePerp", theta_wrtThrCorrInversePerp);
-  if(varIsGood[89]) inTree_p->SetBranchAddress("phi_wrtThrCorrInversePerp", phi_wrtThrCorrInversePerp);
-  if(varIsGood[90]) inTree_p->SetBranchAddress("pt_wrtThrMissP", pt_wrtThrMissP);
-  if(varIsGood[91]) inTree_p->SetBranchAddress("eta_wrtThrMissP", eta_wrtThrMissP);
-  if(varIsGood[92]) inTree_p->SetBranchAddress("rap_wrtThrMissP", rap_wrtThrMissP);
-  if(varIsGood[93]) inTree_p->SetBranchAddress("theta_wrtThrMissP", theta_wrtThrMissP);
-  if(varIsGood[94]) inTree_p->SetBranchAddress("phi_wrtThrMissP", phi_wrtThrMissP);
-  if(varIsGood[95]) inTree_p->SetBranchAddress("pt_wrtThrMissPPerp", pt_wrtThrMissPPerp);
-  if(varIsGood[96]) inTree_p->SetBranchAddress("eta_wrtThrMissPPerp", eta_wrtThrMissPPerp);
-  if(varIsGood[97]) inTree_p->SetBranchAddress("rap_wrtThrMissPPerp", rap_wrtThrMissPPerp);
-  if(varIsGood[98]) inTree_p->SetBranchAddress("theta_wrtThrMissPPerp", theta_wrtThrMissPPerp);
-  if(varIsGood[99]) inTree_p->SetBranchAddress("phi_wrtThrMissPPerp", phi_wrtThrMissPPerp);
-  if(varIsGood[100]) inTree_p->SetBranchAddress("passesArtificAccept", passesArtificAccept);
-  if(varIsGood[101]) inTree_p->SetBranchAddress("artificAcceptEffCorrection", artificAcceptEffCorrection);
-  if(varIsGood[102]) inTree_p->SetBranchAddress("anc", anc);
-  
-    return;
+  if(varIsGood[40]) inTree_p->SetBranchAddress("eleID", eleId);
+  if(varIsGood[41]) inTree_p->SetBranchAddress("muID", muId);
+  if(varIsGood[42]) inTree_p->SetBranchAddress("conversion", conversion);
+  if(varIsGood[43]) inTree_p->SetBranchAddress("pt_wrtThr", pt_wrtThr);
+  if(varIsGood[44]) inTree_p->SetBranchAddress("eta_wrtThr", eta_wrtThr);
+  if(varIsGood[45]) inTree_p->SetBranchAddress("rap_wrtThr", rap_wrtThr);
+  if(varIsGood[46]) inTree_p->SetBranchAddress("theta_wrtThr", theta_wrtThr);
+  if(varIsGood[47]) inTree_p->SetBranchAddress("phi_wrtThr", phi_wrtThr);
+  if(varIsGood[48]) inTree_p->SetBranchAddress("pt_wrtThrPerp", pt_wrtThrPerp);
+  if(varIsGood[49]) inTree_p->SetBranchAddress("eta_wrtThrPerp", eta_wrtThrPerp);
+  if(varIsGood[50]) inTree_p->SetBranchAddress("rap_wrtThrPerp", rap_wrtThrPerp);
+  if(varIsGood[51]) inTree_p->SetBranchAddress("theta_wrtThrPerp", theta_wrtThrPerp);
+  if(varIsGood[52]) inTree_p->SetBranchAddress("phi_wrtThrPerp", phi_wrtThrPerp);
+  if(varIsGood[53]) inTree_p->SetBranchAddress("pt_wrtChThr", pt_wrtChThr);
+  if(varIsGood[54]) inTree_p->SetBranchAddress("eta_wrtChThr", eta_wrtChThr);
+  if(varIsGood[55]) inTree_p->SetBranchAddress("rap_wrtChThr", rap_wrtChThr);
+  if(varIsGood[56]) inTree_p->SetBranchAddress("theta_wrtChThr", theta_wrtChThr);
+  if(varIsGood[57]) inTree_p->SetBranchAddress("phi_wrtChThr", phi_wrtChThr);
+  if(varIsGood[58]) inTree_p->SetBranchAddress("pt_wrtChThrPerp", pt_wrtChThrPerp);
+  if(varIsGood[59]) inTree_p->SetBranchAddress("eta_wrtChThrPerp", eta_wrtChThrPerp);
+  if(varIsGood[60]) inTree_p->SetBranchAddress("phi_wrtChThrPerp", phi_wrtChThrPerp);
+  if(varIsGood[61]) inTree_p->SetBranchAddress("rap_wrtChThrPerp", rap_wrtChThrPerp);
+  if(varIsGood[62]) inTree_p->SetBranchAddress("theta_wrtChThrPerp", theta_wrtChThrPerp);
+  if(varIsGood[63]) inTree_p->SetBranchAddress("pt_wrtNeuThr", pt_wrtNeuThr);
+  if(varIsGood[64]) inTree_p->SetBranchAddress("eta_wrtNeuThr", eta_wrtNeuThr);
+  if(varIsGood[65]) inTree_p->SetBranchAddress("rap_wrtNeuThr", rap_wrtNeuThr);
+  if(varIsGood[66]) inTree_p->SetBranchAddress("theta_wrtNeuThr", theta_wrtNeuThr);
+  if(varIsGood[67]) inTree_p->SetBranchAddress("phi_wrtNeuThr", phi_wrtNeuThr);
+  if(varIsGood[68]) inTree_p->SetBranchAddress("pt_wrtNeuThrPerp", pt_wrtNeuThrPerp);
+  if(varIsGood[69]) inTree_p->SetBranchAddress("eta_wrtNeuThrPerp", eta_wrtNeuThrPerp);
+  if(varIsGood[70]) inTree_p->SetBranchAddress("theta_wrtNeuThrPerp", theta_wrtNeuThrPerp);
+  if(varIsGood[71]) inTree_p->SetBranchAddress("phi_wrtNeuThrPerp", phi_wrtNeuThrPerp);
+  if(varIsGood[72]) inTree_p->SetBranchAddress("rap_wrtNeuThrPerp", rap_wrtNeuThrPerp);
+  if(varIsGood[73]) inTree_p->SetBranchAddress("pt_wrtThrCorr", pt_wrtThrCorr);
+  if(varIsGood[74]) inTree_p->SetBranchAddress("eta_wrtThrCorr", eta_wrtThrCorr);
+  if(varIsGood[75]) inTree_p->SetBranchAddress("rap_wrtThrCorr", rap_wrtThrCorr);
+  if(varIsGood[76]) inTree_p->SetBranchAddress("theta_wrtThrCorr", theta_wrtThrCorr);
+  if(varIsGood[77]) inTree_p->SetBranchAddress("phi_wrtThrCorr", phi_wrtThrCorr);
+  if(varIsGood[78]) inTree_p->SetBranchAddress("pt_wrtThrCorrPerp", pt_wrtThrCorrPerp);
+  if(varIsGood[79]) inTree_p->SetBranchAddress("eta_wrtThrCorrPerp", eta_wrtThrCorrPerp);
+  if(varIsGood[80]) inTree_p->SetBranchAddress("rap_wrtThrCorrPerp", rap_wrtThrCorrPerp);
+  if(varIsGood[81]) inTree_p->SetBranchAddress("theta_wrtThrCorrPerp", theta_wrtThrCorrPerp);
+  if(varIsGood[82]) inTree_p->SetBranchAddress("phi_wrtThrCorrPerp", phi_wrtThrCorrPerp);
+  if(varIsGood[83]) inTree_p->SetBranchAddress("pt_wrtThrCorrInverse", pt_wrtThrCorrInverse);
+  if(varIsGood[84]) inTree_p->SetBranchAddress("eta_wrtThrCorrInverse", eta_wrtThrCorrInverse);
+  if(varIsGood[85]) inTree_p->SetBranchAddress("rap_wrtThrCorrInverse", rap_wrtThrCorrInverse);
+  if(varIsGood[86]) inTree_p->SetBranchAddress("theta_wrtThrCorrInverse", theta_wrtThrCorrInverse);
+  if(varIsGood[87]) inTree_p->SetBranchAddress("phi_wrtThrCorrInverse", phi_wrtThrCorrInverse);
+  if(varIsGood[88]) inTree_p->SetBranchAddress("pt_wrtThrCorrInversePerp", pt_wrtThrCorrInversePerp);
+  if(varIsGood[89]) inTree_p->SetBranchAddress("eta_wrtThrCorrInversePerp", eta_wrtThrCorrInversePerp);
+  if(varIsGood[90]) inTree_p->SetBranchAddress("rap_wrtThrCorrInversePerp", rap_wrtThrCorrInversePerp);
+  if(varIsGood[91]) inTree_p->SetBranchAddress("theta_wrtThrCorrInversePerp", theta_wrtThrCorrInversePerp);
+  if(varIsGood[92]) inTree_p->SetBranchAddress("phi_wrtThrCorrInversePerp", phi_wrtThrCorrInversePerp);
+  if(varIsGood[93]) inTree_p->SetBranchAddress("pt_wrtThrMissP", pt_wrtThrMissP);
+  if(varIsGood[94]) inTree_p->SetBranchAddress("eta_wrtThrMissP", eta_wrtThrMissP);
+  if(varIsGood[95]) inTree_p->SetBranchAddress("rap_wrtThrMissP", rap_wrtThrMissP);
+  if(varIsGood[96]) inTree_p->SetBranchAddress("theta_wrtThrMissP", theta_wrtThrMissP);
+  if(varIsGood[97]) inTree_p->SetBranchAddress("phi_wrtThrMissP", phi_wrtThrMissP);
+  if(varIsGood[98]) inTree_p->SetBranchAddress("pt_wrtThrMissPPerp", pt_wrtThrMissPPerp);
+  if(varIsGood[99]) inTree_p->SetBranchAddress("eta_wrtThrMissPPerp", eta_wrtThrMissPPerp);
+  if(varIsGood[100]) inTree_p->SetBranchAddress("rap_wrtThrMissPPerp", rap_wrtThrMissPPerp);
+  if(varIsGood[101]) inTree_p->SetBranchAddress("theta_wrtThrMissPPerp", theta_wrtThrMissPPerp);
+  if(varIsGood[102]) inTree_p->SetBranchAddress("phi_wrtThrMissPPerp", phi_wrtThrMissPPerp);
+  if(varIsGood[103]) inTree_p->SetBranchAddress("passesArtificAccept", passesArtificAccept);
+  if(varIsGood[104]) inTree_p->SetBranchAddress("artificAcceptEffCorrection", artificAcceptEffCorrection);
+  if(varIsGood[105]) inTree_p->SetBranchAddress("anc", anc);
+  return;
 }
 
 void particleData::SetBranchWrite(TTree* inTree_p, bool writeMinimal)
@@ -681,6 +692,9 @@ void particleData::SetBranchWrite(TTree* inTree_p, bool writeMinimal)
   inTree_p->Branch("d0", d0, "d0[nParticle]/F");
   inTree_p->Branch("z0", z0, "z0[nParticle]/F");
   inTree_p->Branch("weight", weight, "weight[nParticle]/F");
+  inTree_p->Branch("eleId", eleId, "eleId[nParticle]/I");
+  inTree_p->Branch("muId", muId, "muId[nParticle]/I");
+  inTree_p->Branch("conversion", conversion, "conversion[nParticle]/I");
   
   if (!writeMinimal)
   {
@@ -806,6 +820,9 @@ void particleData::preFillClean()
     vy[i] = reducedPrecision(vy[i]);
     vz[i] = reducedPrecision(vz[i]);
     weight[i] = reducedPrecision(weight[i]);
+    eleId[i] = reducedPrecision(eleId[i]);
+    muId[i] = reducedPrecision(muId[i]);
+    conversion[i] = reducedPrecision(conversion[i]);
     
     if (!initMinimal)
     {
@@ -921,7 +938,10 @@ void particleData::_init()
     else if(varStr[i].find("source") != std::string::npos)     printf("\tint  %s;\n", varStr[i].c_str());
     else if(varStr[i].find("bFlag") != std::string::npos)      printf("\tint  %s;\n", varStr[i].c_str());
     else if(varStr[i].find("nParticle") != std::string::npos)  printf("\tint  %s;\n", varStr[i].c_str());
-    else if(varStr[i].find("pid") != std::string::npos)        printf("\tfloat  %s[nMaxPart];\n", varStr[i].c_str());
+    else if(varStr[i].find("pid") != std::string::npos)        printf("\tint  %s[nMaxPart];\n", varStr[i].c_str());
+    else if(varStr[i].find("eleId") != std::string::npos)      printf("\tint  %s[nMaxPart];\n", varStr[i].c_str());
+    else if(varStr[i].find("muId") != std::string::npos)       printf("\tint  %s[nMaxPart];\n", varStr[i].c_str());
+    else if(varStr[i].find("conversion") != std::string::npos) printf("\tint  %s[nMaxPart];\n", varStr[i].c_str());
 
     // float
     else{
@@ -964,6 +984,9 @@ void particleData::_init()
     else if(varStr[i].find("bFlag") != std::string::npos)      printf("\t%s = -999;\n", varStr[i].c_str());
     else if(varStr[i].find("nParticle") != std::string::npos)  printf("\t%s = -999;\n", varStr[i].c_str());
     else if(varStr[i].find("pid") != std::string::npos)        printf("\t%s[i] = -999;\n", varStr[i].c_str());
+    else if(varStr[i].find("eleId") != std::string::npos)      printf("\t%s[i] = -999;\n", varStr[i].c_str());
+    else if(varStr[i].find("muId") != std::string::npos)       printf("\t%s[i] = -999;\n", varStr[i].c_str());
+    else if(varStr[i].find("conversion") != std::string::npos) printf("\t%s[i] = -999;\n", varStr[i].c_str());
 
     // float
     else{
@@ -1009,6 +1032,9 @@ void particleData::_setRead()
     else if(varStr[i].find("bFlag") != std::string::npos)      printf("\tif(varIsGood[%d]) inTree_p->SetBranchAddress(\"bFlag\", &bFlag);\n", i);
     else if(varStr[i].find("nParticle") != std::string::npos)  printf("\tif(varIsGood[%d]) inTree_p->SetBranchAddress(\"nParticle\", &nParticle);\n", i);
     else if(varStr[i].find("pid") != std::string::npos)        printf("\tif(varIsGood[%d]) inTree_p->SetBranchAddress(\"pid\", pid);\n", i);
+    else if(varStr[i].find("eleId") != std::string::npos)      printf("\tif(varIsGood[%d]) inTree_p->SetBranchAddress(\"eleId\", eleId);\n", i);
+    else if(varStr[i].find("muId") != std::string::npos)       printf("\tif(varIsGood[%d]) inTree_p->SetBranchAddress(\"muId\", muId);\n", i);
+    else if(varStr[i].find("conversion") != std::string::npos) printf("\tif(varIsGood[%d]) inTree_p->SetBranchAddress(\"conversion\", conversion);\n", i);
 
     // float
     else{
@@ -1054,6 +1080,9 @@ void particleData::_setWrite()
     else if(varStr[i].find("bFlag") != std::string::npos)      printf("\tinTree_p->Branch(\"bFlag\", &bFlag, \"bFlag/I\");\n");
     else if(varStr[i].find("nParticle") != std::string::npos)  printf("\tinTree_p->Branch(\"nParticle\", &nParticle, \"nParticle/I\"); \n");
     else if(varStr[i].find("pid") != std::string::npos)        printf("\tinTree_p->Branch(\"pid\", pid, \"pid[nParticle]/I\");\n");
+    else if(varStr[i].find("eleId") != std::string::npos)      printf("\tinTree_p->Branch(\"eleId\", eleId, \"eleId[nParticle]/I\");\n");
+    else if(varStr[i].find("muId") != std::string::npos)       printf("\tinTree_p->Branch(\"muId\", muId, \"muId[nParticle]/I\");\n");
+    else if(varStr[i].find("conversion") != std::string::npos) printf("\tinTree_p->Branch(\"conversion\", conversion, \"conversion[nParticle]/I\");\n");
 
     // float
     else{
@@ -1098,6 +1127,9 @@ void particleData::_setReducedPrecision()
     else if(varStr[i].find("bFlag") != std::string::npos)      continue;
     else if(varStr[i].find("nParticle") != std::string::npos)  continue;
     else if(varStr[i].find("pid") != std::string::npos)        continue;
+    else if(varStr[i].find("eleId") != std::string::npos)      continue;
+    else if(varStr[i].find("muId") != std::string::npos)       continue;
+    else if(varStr[i].find("conversion") != std::string::npos) continue;
 
     // float
     else{

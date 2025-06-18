@@ -1,15 +1,64 @@
 #!/usr/bin/env python3
 import os
-import glob as glob
+import glob
 import sys
+import subprocess
+from datetime import datetime, timedelta
 
+# === CONFIGURATION SWITCH ===
+# Choose: '94c', '98e1', '99_192', '99_196', '99_200', '99_202', '00'
+selected_config = '94c'
+runAll = False
+
+configs = {
+    '94c': {
+        'nickname': 'Y13709',
+        'eras': 'v94c2',
+        'outdir': '/eos/user/z/zhangj/DELPHI/collision_data/1994_v2/v94c2/',
+    },
+    '98e1': {
+        'nickname': 'R05115',
+        'eras': 'v98e1',
+        'outdir': '/eos/user/z/zhangj/DELPHI/collision_data/1998_v2/v98e1/',
+    },
+    '99_192': {
+        'nickname': 'R05096',
+        'eras': 'v99e1',
+        'outdir': '/eos/user/z/zhangj/DELPHI/collision_data/1999_v2/v99e1/192/',
+    },
+    '99_196': {
+        'nickname': 'R02360',
+        'eras': 'v99e1',
+        'outdir': '/eos/user/z/zhangj/DELPHI/collision_data/1999_v2/v99e1/196/',
+    },
+    '99_200': {
+        'nickname': 'R02125',
+        'eras': 'v99e1',
+        'outdir': '/eos/user/z/zhangj/DELPHI/collision_data/1999_v2/v99e1/200/',
+    },
+    '99_202': {
+        'nickname': 'R05107',
+        'eras': 'v99e1',
+        'outdir': '/eos/user/z/zhangj/DELPHI/collision_data/1999_v2/v99e1/202/',
+    },
+    '00': {
+        'nickname': 'R02102',
+        'eras': 'v00u1',
+        'outdir': '/eos/user/z/zhangj/DELPHI/collision_data/2000_v2/v00u1/',
+    }
+}
+
+cfg = configs[selected_config]
+nickname = cfg['nickname']
+eras = cfg['eras']
+outdir = cfg['outdir']
+
+# === SETUP ===
 os.system('mkdir -p ./dump/log/')
 os.system('mkdir -p ./dump/err/')
 os.system('mkdir -p ./dump/out/')
 os.system('g++ `root-config --glibs --cflags` -I TPCNtupleFormat/ `$FASTJETDIR/bin/fastjet-config --cxxflags --libs --plugins` -o bin/convert.exe convert.C')
-
-#sys.exit()
-
+os.system(f'mkdir -p {outdir}')
 
 PDLINPUT_txt = '''
 *
@@ -19,38 +68,46 @@ FILE = {}
 *
 '''
 
-#nickname = 'Y13709' ## 94c
-#nickname = 'Y13710' ## 94c
-#nickname = 'Y10177' ## 98d2
-#nickname = 'R05115' ## 98e1
-#outdir = '/eos/user/z/zhangj/DELPHI/collision_data/1998_v2/v98e1/'
-
-#nickname = 'R02125'
-#outdir = '/eos/user/z/zhangj/DELPHI/collision_data/1999_v2/v99e1/200/'
-
-#nickname = 'R05107'
-#outdir = '/eos/user/z/zhangj/DELPHI/collision_data/1999_v2/v99e1/202/'
-
-#nickname = 'R05096'
-#outdir = '/eos/user/z/zhangj/DELPHI/collision_data/1999_v2/v99e1/192/'
-
-nickname = 'R02360'
-outdir = '/eos/user/z/zhangj/DELPHI/collision_data/1999_v2/v99e1/196/'
-
-os.system(f'mkdir -p {outdir}')
+# Define time threshold
+one_month_ago = datetime.now() - timedelta(days=30)
 
 os.chdir('dump')
+
+def needs_rerun(eos_path):
+    try:
+        result = subprocess.run(['xrdfs', 'eosuser.cern.ch', 'stat', eos_path], capture_output=True, text=True)
+        if result.returncode != 0:
+            return True  # File doesn't exist
+        output = result.stdout
+        size_line = next(line for line in output.split('\n') if "Size:" in line)
+        time_line = next(line for line in output.split('\n') if "CTime:" in line or "MTime:" in line)
+        size = int(size_line.split(':')[1].strip())
+        date_str = time_line.split(':', 1)[1].strip()
+        file_time = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+        if size < 100000 or file_time < one_month_ago:
+            print(f"🔎 {size} bytes, {file_time}, flagged for reprocessing: {eos_path}")
+            return True
+        return False
+    except Exception as e:
+        print(f"⚠️ Error checking {eos_path}: {e}")
+        return True
+
 for al in glob.glob(f'/eos/opendata/delphi/collision-data/{nickname}/{nickname}.*.al'):
-    f = open('PDLINPUT', 'w')
-    f.write(PDLINPUT_txt.format(al))
-    f.close()
-    os.system('cat PDLINPUT')
-    os.system('bash dump.sh')
-    os.system('echo Recorded `grep -c HAPPY dump.log` events!')
-    basename=os.path.basename(al.strip('.al'))
-    os.system('mv dump.log log/dump.{}.log'.format(basename))
-    os.system('mv dump.err err/dump.{}.err'.format(basename))
-    os.system('../bin/convert.exe log/dump.{}.log out/{}.root'.format(basename,basename))
-    os.system(f'mv out/{basename}.root {outdir}')
-    os.system(f'rm log/dump.{basename}.log')
-    os.system(f'rm err/dump.{basename}.err')
+    basename = os.path.basename(al).replace('.al', '')
+    eos_root_path = f"{outdir}{basename}.root"
+
+    if  runAll or needs_rerun(eos_root_path):
+        print(f"🔁 Reprocessing {basename}")
+        with open('PDLINPUT', 'w') as f:
+            f.write(PDLINPUT_txt.format(al))
+        os.system('bash dump.sh')
+        os.system('echo Recorded `grep -c HAPPY dump.log` events!')
+        os.rename('dump.log', f'log/dump.{basename}.log')
+        os.rename('dump.err', f'err/dump.{basename}.err')
+        os.system(f'../bin/convert.exe log/dump.{basename}.log out/{basename}.root')
+        os.system(f'cp out/{basename}.root {outdir}')
+        os.remove(f'log/dump.{basename}.log')
+        os.remove(f'err/dump.{basename}.err')
+        os.remove(f'out/{basename}.root')
+    else:
+        print(f"✅ Skipping {basename}, file is OK")

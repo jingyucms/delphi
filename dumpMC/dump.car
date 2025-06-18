@@ -413,6 +413,8 @@ CCC  +        IHAD4 .NE. 0 ) NEED = 1
 +CDE, PSCLUJ.
 +CDE, PSCMUD.
 +CDE, PSCELD.
++CDE, PSCTBL.
++CDE, PSCVTX.
 
 *
       INTEGER I, IERR
@@ -435,13 +437,26 @@ CCC  +        IHAD4 .NE. 0 ) NEED = 1
       ENDDO
       WRITE(*, 104)     "CHECK: GEN:", NP
       DO I=1, NP
-         WRITE(*, *)  I, KP(I,2), PP(I,1), PP(I,2),
-     $        PP(I,3), PP(I,4), PP(I,5), KP(I,1)
+         WRITE(*, *)  I, KP(I,1), KP(I,2), PP(I,1), PP(I,2),
+     $        PP(I,3), PP(I,4), PP(I,5) 
       ENDDO
+      WRITE(*, 105)     "CHECK: SIM:", NVECMC
+      DO I=1, NVECMC
+         WRITE(*, *)  I, KP(ISTSH(I), 1), KP(ISTSH(I), 2), 
+     $        VECP(1,300+I), VECP(2,300+I), VECP(3,300+I),
+     $        VECP(4,300+I), VECP(5,300+I), VECP(7,300+I),
+     $        ISTVX(1, I), ISTVX(2, I)
+      ENDDO
+*-      WRITE(*, 105)     "CHECK: VTX:", NVTXMC
+*-      DO I=1, NVTXMC
+*-         WRITE(*, *)  150+I, KVTX(1,150+I), KVTX(2,150+I),
+*-     $        QVTX(6,150+I), QVTX(7,150+I), QVTX(8, 150+I)
+*-      ENDDO
  97   FORMAT(A,F10.2)
  98   FORMAT(A,I10,I10)
  99   FORMAT(A,I10,I10,I10)
  104  FORMAT(A,I10)
+ 105  FORMAT(A,I10)
 * 105  FORMAT(A,I10,F12.6, F12.6, F12.6, F12.6, F12.6, F12.6,I10)
 * 106  FORMAT(A,"(",F12.6,",",F12.6,",",F12.6,",",F12.6,")")
       END

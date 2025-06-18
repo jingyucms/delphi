@@ -115,9 +115,9 @@ void convert(const char* inputFileName, const char* outputFileName,
             doParticle=1;
         } else if (!line.empty() && doParticle==1) {
             std::istringstream iss(line);
-            int particleNumber;
+            int particleNumber, eid, conversion, muid;
             float q, pxVal, pyVal, pzVal, eVal, emfVal, hpcVal, hacVal, sticVal, lockVal, d0, z0, length;
-            iss >> particleNumber >> q >> pxVal >> pyVal >> pzVal >> eVal >> emfVal >> hpcVal >> hacVal >> sticVal >> lockVal >> d0 >> z0 >> length;
+            iss >> particleNumber >> q >> pxVal >> pyVal >> pzVal >> eVal >> emfVal >> hpcVal >> hacVal >> sticVal >> lockVal >> d0 >> z0 >> length >> eid >> conversion >> muid;
 
             TLorentzVector temp(pxVal, pyVal, pzVal, eVal);
 
@@ -152,7 +152,10 @@ void convert(const char* inputFileName, const char* outputFileName,
 		out_pData.d0[nParticle] = d0;
 		out_pData.z0[nParticle] = z0;
 		out_pData.ntpc[nParticle] = (out_pData.charge[nParticle]!=0)? 7: 0;
-		out_pData.weight[nParticle] = length; // use this variable to store track length for DELPHI 
+		out_pData.weight[nParticle] = length; // use this variable to store track length for DELPHI
+		out_pData.eleId[nParticle] = eid;
+		out_pData.muId[nParticle] = muid;
+		out_pData.conversion[nParticle] = conversion;
 
 		// follow the same definition in eventSelection.h
 		if (out_pData.pwflag[nParticle]<=2) {
